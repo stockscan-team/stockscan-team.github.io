@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StockScan · Sistema de Gestión de Almacén</title>
+<meta name="description" content="StockScan es un Sistema de Gestión de Almacén en Java Swing con arquitectura MVC y patrón DAO: inventario, ubicaciones, alertas y trazabilidad.">
+<meta name="theme-color" content="#0B1120">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230B1120'/%3E%3Cpath d='M8 12V9h3M24 12V9h-3M8 20v3h3M24 20v3h-3M12 11v10M16 11v10M20 11v10' stroke='%230EA5E9' stroke-width='2' fill='none'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,700..900&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0B1120;--surf:#111827;--txt:#F8FAFC;--mut:#94A3B8;--pri:#0EA5E9;--steel:#0284C7;--ok:#10B981;--warn:#EF4444;--box:#F97316;--box2:#FB923C;--ln:rgba(148,163,184,.18)}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--mut);font:400 1.0625rem/1.65 Inter,system-ui,sans-serif;overflow-x:hidden}
+h1,h2,h3{font-family:"Space Grotesk",Inter,sans-serif;font-weight:700;letter-spacing:-.035em;color:var(--txt);margin:0;-webkit-text-stroke:.012em currentColor}
+h1{font-size:clamp(2.8rem,7.8vw,6.8rem);line-height:.95}
+h2{font-size:clamp(2.3rem,5.6vw,4.6rem);line-height:.98;margin-bottom:1.2rem}
+h3{font-size:1.25rem;letter-spacing:-.02em;margin-bottom:.4rem}
+p{margin:0 0 1rem}a{color:inherit}.mono{font-family:"JetBrains Mono",ui-monospace,monospace}
+:focus-visible{outline:2px solid var(--pri);outline-offset:3px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 1.25rem}
+.ic{width:24px;height:24px;fill:none;stroke:var(--pri);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+nav{position:fixed;inset:0 0 auto;z-index:20;background:rgba(11,17,32,.65);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--ln)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;gap:1rem}
+.brand{display:flex;align-items:center;gap:.6rem;font:700 1.2rem "Space Grotesk";color:var(--txt);text-decoration:none;letter-spacing:-.02em}
+.links{display:flex;gap:1.6rem;font-size:.95rem}.links a{text-decoration:none}.links a:hover{color:var(--txt)}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.85rem 1.4rem;border-radius:10px;font:600 1rem Inter;text-decoration:none;border:1px solid var(--ln);color:var(--txt);background:transparent;cursor:pointer;transition:border-color .2s,background .2s,transform .2s}
+.btn:hover{border-color:rgba(14,165,233,.5);transform:translateY(-2px)}.btn.pri{background:var(--pri);border-color:var(--pri);color:#06121F}.btn.pri:hover{background:#38BDF8}
+.hero{position:relative;padding:8.5rem 0 4.5rem;overflow:hidden}
+.glow{position:absolute;width:760px;height:760px;right:-200px;top:-160px;background:radial-gradient(closest-side,rgba(14,165,233,.25),transparent);pointer-events:none;will-change:transform}
+.hero .wrap{position:relative}.hero h1 em{font-style:normal;color:var(--pri)}
+.hrow{display:flex;justify-content:space-between;align-items:flex-end;gap:2rem;flex-wrap:wrap;margin:2.5rem 0 2.5rem}
+.sub{font-size:1.35rem;line-height:1.5;max-width:36rem;margin:0;color:#CBD5E1}.cta{display:flex;gap:.75rem;flex-wrap:wrap}
+.stage{background:var(--surf);border:1px solid var(--ln);border-radius:22px;overflow:hidden;background-image:linear-gradient(rgba(148,163,184,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(148,163,184,.06) 1px,transparent 1px);background-size:40px 40px}
+.stage svg{display:block;width:100%;height:auto}.cap{font-size:.9rem;margin:.9rem 0 0;text-align:center}
+.belt{animation:bt .8s linear infinite}@keyframes bt{to{stroke-dashoffset:-20}}
+.mq{overflow:hidden;border-block:1px solid var(--ln);padding:1.1rem 0;white-space:nowrap;background:var(--surf)}
+.mq div{display:inline-block;animation:mq 30s linear infinite;font:700 clamp(2.4rem,6vw,4.8rem)/1 "Space Grotesk";letter-spacing:-.03em;color:var(--txt)}
+.mq span,.mq i{margin-right:2.2rem}.mq .o{color:transparent;-webkit-text-stroke:1.5px var(--pri)}
+.mq i{display:inline-block;width:.75em;height:.58em;background:var(--box);border-radius:.08em;box-shadow:inset 0 .16em 0 var(--box2);vertical-align:.02em;animation:hop 1.6s ease-in-out infinite}
+@keyframes mq{to{transform:translateX(-50%)}}@keyframes hop{50%{transform:translateY(-.12em)}}
+section{padding:6rem 0;border-top:1px solid var(--ln)}.mq+section{border-top:0}
+.lead{max-width:42rem;margin-bottom:3rem;font-size:1.2rem}
+.big{font:700 clamp(1.5rem,3vw,2.4rem)/1.2 "Space Grotesk";letter-spacing:-.02em;color:var(--txt);max-width:46rem}
+.art{background:var(--surf);border:1px solid var(--ln);border-radius:18px;padding:1.2rem;transition:border-color .25s,box-shadow .25s}
+.art:hover{border-color:rgba(249,115,22,.45);box-shadow:0 0 36px -10px rgba(249,115,22,.4)}.art svg{display:block;width:100%;height:auto}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+.row{padding:3.2rem 0;border-top:1px solid var(--ln)}.row:nth-of-type(even) .art{order:-1}
+.row h3{font-size:clamp(2rem,4vw,3.3rem);line-height:1;margin-bottom:1rem}.row p{font-size:1.15rem;max-width:30rem}
+.tag{display:inline-block;margin:.2rem .3rem .2rem 0;padding:.25rem .7rem;border:1px solid var(--ln);border-radius:99px;font-size:.85rem;color:var(--txt)}
+.tile{background:var(--surf);border:1px solid var(--ln);border-radius:14px;padding:1.6rem;transition:border-color .25s,box-shadow .25s,transform .25s;text-decoration:none;display:block}
+.tile:hover{border-color:rgba(14,165,233,.5);box-shadow:0 0 24px -8px rgba(14,165,233,.4);transform:translateY(-4px)}
+.tile .ic{margin-bottom:1rem}.tile p{margin:0;font-size:.97rem}.tile h3{font-size:1.4rem}
+.tile .go{display:flex;align-items:center;gap:.3rem;margin-top:1rem;color:var(--pri);font-size:.9rem;font-weight:500}
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.2rem}
+.av{width:48px;height:48px;border-radius:12px;background:rgba(14,165,233,.12);color:var(--pri);display:grid;place-items:center;font:600 1rem "JetBrains Mono";margin-bottom:1rem}
+.news{background:var(--surf);border:1px solid var(--ln);border-radius:20px;padding:clamp(1.5rem,4vw,3.2rem);display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center}
+form{display:grid;gap:.8rem}label{font-size:.85rem;color:var(--txt)}
+input,select{width:100%;font:inherit;color:var(--txt);background:var(--bg);border:1px solid var(--ln);border-radius:8px;padding:.8rem .9rem}
+input:focus,select:focus{border-color:var(--pri);outline:none;box-shadow:0 0 0 3px rgba(14,165,233,.2)}
+.ficon{display:inline-block;width:0;overflow:hidden;transition:width .3s}.done .ficon{width:20px}
+.msg{min-height:1.4rem;font-size:.9rem;margin:0}.fine{font-size:.8rem;margin:0}.ok{color:var(--ok)}.warn{color:var(--warn)}.pill{display:inline-flex;align-items:center;gap:.4rem}.pill::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+footer{border-top:1px solid var(--ln);padding-top:2.5rem}
+footer .wrap{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wrap;align-items:center;font-size:.92rem;margin-bottom:3rem}
+.fl{display:flex;gap:1.3rem;flex-wrap:wrap}.fl a{text-decoration:none}.fl a:hover{color:var(--txt)}
+.giant{padding:0 1.25rem;line-height:0;overflow:hidden}.giant svg{display:block;width:100%;height:auto}
+.rv{opacity:0;transform:translateY(18px);transition:opacity .7s,transform .7s}.rv.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:no-preference){
+ .giant svg{transform:translateY(55%);transition:transform 1.3s cubic-bezier(.2,.8,.2,1)}.giant.in svg{transform:none}
+ .art .route{stroke-dasharray:310;stroke-dashoffset:310}.art.in .route{animation:dr 2s .3s ease forwards}@keyframes dr{to{stroke-dashoffset:0}}
+ .gb{transform-box:fill-box;transform-origin:50% 100%;transform:scaleY(0)}.art.in .gb{animation:gr .9s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:calc(var(--i)*.1s)}@keyframes gr{to{transform:scaleY(1)}}
+ .art .st{opacity:0;transform:translateX(-16px)}.art.in .st{animation:fi .6s forwards;animation-delay:calc(var(--i)*.3s)}@keyframes fi{to{opacity:1;transform:none}}
+}
+@media(max-width:900px){.two,.news{grid-template-columns:1fr;gap:2rem}.row:nth-of-type(even) .art{order:0}.links{display:none}}
+@media(max-width:560px){.hero{padding-top:7rem}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.rv{opacity:1;transform:none;transition:none}.mq div,.mq i,.belt{animation:none}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<g id="bxg"><rect width="96" height="76" rx="5" fill="#F97316" stroke="#C2410C" stroke-width="2"/><rect width="96" height="16" rx="5" fill="#FB923C"/><rect x="40" width="16" height="76" fill="#FDBA74" opacity=".85"/><rect x="62" y="42" width="26" height="24" rx="2" fill="#fff"/><path d="M66 46v16M70 46v16M73 46v16M78 46v16M82 46v16" stroke="#0B1120" stroke-width="1.6"/></g>
+<symbol id="code" viewBox="0 0 24 24"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></symbol>
+<symbol id="book" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
+<symbol id="layers" viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5-10-5ZM2 17l10 5 10-5M2 12l10 5 10-5"/></symbol>
+<symbol id="pointer" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></symbol>
+<symbol id="out" viewBox="0 0 24 24"><path d="M7 7h10v10M7 17 17 7"/></symbol>
+<symbol id="chk" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+</defs></svg>
+
+<nav><div class="wrap">
+  <a class="brand" href="#"><svg width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="#0EA5E9" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 11V7a2 2 0 0 1 2-2h4M21 5h4a2 2 0 0 1 2 2v4M27 21v4a2 2 0 0 1-2 2h-4M11 27H7a2 2 0 0 1-2-2v-4M11 11v10M16 11v10M21 11v10"/></svg>StockScan</a>
+  <div class="links"><a href="#origen">Origen</a><a href="#soluciones">Soluciones</a><a href="#arquitectura">Arquitectura</a><a href="#equipo">Equipo</a></div>
+  <a class="btn pri" href="#newsletter">Newsletter</a>
+</div></nav>
+
+<main>
+<div class="hero"><div class="glow" id="glow"></div><div class="wrap">
+  <h1>Del caos del almacén a la <em>trazabilidad absoluta.</em></h1>
+  <div class="hrow">
+    <p class="sub">StockScan registra cada producto, cada ubicación y cada movimiento, para que tu equipo sepa siempre qué hay, dónde está y qué ha pasado con ello.</p>
+    <div class="cta"><a class="btn pri" href="#ecosistema">Explorar el Ecosistema</a><a class="btn" href="#newsletter">Suscribirse a Novedades</a></div>
+  </div>
+  <div class="stage"><svg viewBox="0 0 960 400" role="img" aria-label="Un móvil escanea un paquete naranja y el paquete viaja hasta su ubicación en la estantería">
+    <rect y="338" width="960" height="62" fill="#0D1526"/><rect x="20" y="336" width="330" height="14" rx="7" fill="#1E293B"/>
+    <path class="belt" d="M32 343H340" stroke="#475569" stroke-width="6" stroke-dasharray="2 18" stroke-linecap="round"/>
+    <g fill="#334155"><rect x="496" y="40" width="6" height="298"/><rect x="898" y="40" width="6" height="298"/><rect x="496" y="132" width="408" height="6"/><rect x="496" y="222" width="408" height="6"/><rect x="496" y="312" width="408" height="6"/></g>
+    <g id="slots"></g>
+    <path id="route" fill="none" stroke="#38BDF8" stroke-width="3" stroke-dasharray="8 7" stroke-linecap="round" opacity="0"/>
+    <rect id="tgt" width="84" height="70" rx="5" fill="rgba(14,165,233,.15)" stroke="#38BDF8" stroke-width="3" opacity="0"/>
+    <polygon id="beam" points="88,176 124,176 156,262 60,262" fill="rgba(14,165,233,.25)" opacity="0"/>
+    <g id="pkg" opacity="0"><use href="#bxg"/></g>
+    <rect id="sl" x="60" y="262" width="96" height="3" fill="#7DD3FC" opacity="0"/>
+    <g id="phone" transform="translate(0 -170)" opacity="0">
+      <rect x="64" y="36" width="84" height="138" rx="14" fill="#0B1120" stroke="#38BDF8" stroke-width="2"/><rect x="70" y="46" width="72" height="118" rx="8" fill="#0F172A"/>
+      <path d="M78 60v-6h6M134 54h6v6M78 150v6h6M140 150v6h-6" fill="none" stroke="#38BDF8" stroke-width="2"/>
+      <g font-family="JetBrains Mono,monospace" text-anchor="middle"><text id="ps1" x="106" y="92" font-size="9" fill="#94A3B8"></text><text id="ps2" x="106" y="110" font-size="10" fill="#F8FAFC"></text>
+      <g id="pp" opacity="0"><rect x="76" y="124" width="60" height="22" rx="11" fill="rgba(16,185,129,.2)" stroke="#10B981"/><text id="pt" x="106" y="139" font-size="10" fill="#10B981"></text></g></g>
+    </g>
+    <circle id="rip" r="10" fill="none" stroke="#10B981" stroke-width="3" opacity="0"/>
+    <g id="badge" opacity="0"><rect x="-58" y="-13" width="116" height="26" rx="13" fill="#10B981"/><text id="bt" y="5" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="12" font-weight="500" fill="#06121F"></text></g>
+  </svg></div>
+  <p class="cap">Escaneas el paquete y StockScan lo lleva directo a su ubicación.</p>
+</div></div>
+
+<div class="mq" aria-hidden="true"><div>
+  <span>Escanea</span><i></i><span class="o">Ubica</span><i></i><span>Controla</span><i></i><span class="o">Traza</span><i></i><span>Escanea</span><i></i><span class="o">Ubica</span><i></i><span>Controla</span><i></i><span class="o">Traza</span><i></i>
+  <span>Escanea</span><i></i><span class="o">Ubica</span><i></i><span>Controla</span><i></i><span class="o">Traza</span><i></i><span>Escanea</span><i></i><span class="o">Ubica</span><i></i><span>Controla</span><i></i><span class="o">Traza</span><i></i>
+</div></div>
+
+<section id="origen"><div class="wrap two">
+  <div class="rv">
+    <h2>El origen de StockScan</h2>
+    <p class="big">Todo empezó con una pregunta: ¿por qué saber dónde está algo sigue dependiendo de una hoja de cálculo que nadie se atreve a tocar?</p>
+    <p>Las listas interminables y los números que no cuadran al cierre del día se pagan en horas y en tranquilidad. Quien lo sufre es el operario, que solo quiere hacer bien su trabajo.</p>
+    <p>Cuatro desarrolladores decidimos construir una herramienta digna de ese trabajo: clara, rápida y pensada para usarse de pie, con un lector en la mano. Sigue en construcción y cada avance se publica a la vista de todos.</p>
+  </div>
+  <div class="art rv"><svg viewBox="0 0 480 340" role="img" aria-label="Estantería con cajas naranjas y un lector de códigos escaneando una etiqueta">
+    <g fill="#334155"><rect x="40" y="30" width="6" height="270"/><rect x="354" y="30" width="6" height="270"/><rect x="40" y="110" width="320" height="6"/><rect x="40" y="200" width="320" height="6"/><rect x="40" y="290" width="320" height="6"/></g>
+    <g fill="#F97316" stroke="#C2410C" stroke-width="2"><rect x="60" y="56" width="70" height="54" rx="3"/><rect x="138" y="70" width="56" height="40" rx="3"/><rect x="202" y="48" width="90" height="62" rx="3"/><rect x="300" y="64" width="50" height="46" rx="3"/><rect x="60" y="150" width="64" height="50" rx="3"/><rect x="226" y="160" width="56" height="40" rx="3"/><rect x="290" y="142" width="58" height="58" rx="3"/><rect x="60" y="238" width="100" height="52" rx="3"/><rect x="168" y="220" width="70" height="70" rx="3"/><rect x="246" y="250" width="50" height="40" rx="3"/><rect x="304" y="230" width="44" height="60" rx="3"/></g>
+    <rect x="132" y="130" width="84" height="70" rx="3" fill="#FB923C" stroke="#38BDF8" stroke-width="2.5"><animate attributeName="stroke-width" values="2.5;5;2.5" dur="1.6s" repeatCount="indefinite"/></rect>
+    <rect x="146" y="150" width="56" height="34" rx="2" fill="#fff"/><path d="M152 154v26M157 154v26M160 154v26M166 154v26M170 154v26M177 154v26M181 154v26M188 154v26M194 154v26" stroke="#0B1120" stroke-width="2"/>
+    <path d="M396 206 202 158v32Z" fill="rgba(14,165,233,.28)"><animate attributeName="opacity" values="1;.35;1" dur="1.6s" repeatCount="indefinite"/></path><path d="M396 206 202 174" stroke="#38BDF8" stroke-width="2"/>
+    <g transform="rotate(-8 420 260)"><rect x="392" y="196" width="60" height="124" rx="14" fill="#111827" stroke="#0EA5E9" stroke-width="2"/><rect x="402" y="214" width="40" height="46" rx="5" fill="#0B1120"/><path d="M410 232h24M410 242h16" stroke="#10B981" stroke-width="2"/><circle cx="422" cy="290" r="9" fill="#0EA5E9"/>
+      <animateTransform attributeName="transform" type="rotate" values="-8 420 260;-3 420 260;-8 420 260" dur="2.4s" repeatCount="indefinite"/></g>
+  </svg></div>
+</div></section>
+
+<section id="soluciones"><div class="wrap">
+  <h2 class="rv">Todo el almacén, bajo control</h2>
+  <p class="lead rv">Una sola aplicación para saber qué entra, qué sale y qué necesita atención.</p>
+
+  <div class="row two"><div class="rv"><h3>Cada producto, en su sitio.</h3><p>Un mapa de estanterías para localizar cualquier producto en segundos. Selecciona una y mira qué hay dentro.</p></div>
+  <div class="art rv"><svg viewBox="0 0 480 300" role="img" aria-label="Plano del almacén con un paquete naranja siguiendo la ruta hasta la ubicación A-14">
+    <defs><pattern id="cl" width="24" height="20" patternUnits="userSpaceOnUse"><rect x="2" y="2" width="20" height="16" rx="2" fill="#1E293B" stroke="#475569"/></pattern>
+    <pattern id="ob" width="72" height="60" patternUnits="userSpaceOnUse"><rect x="2" y="2" width="20" height="16" rx="2" fill="#F97316"/><rect x="50" y="22" width="20" height="16" rx="2" fill="#F97316"/><rect x="26" y="42" width="20" height="16" rx="2" fill="#F97316"/></pattern></defs>
+    <g id="mp"><rect x="24" y="20" width="168" height="100" fill="url(#cl)"/><rect x="288" y="20" width="168" height="100" fill="url(#cl)"/><rect x="24" y="180" width="168" height="100" fill="url(#cl)"/><rect x="288" y="180" width="168" height="100" fill="url(#cl)"/></g>
+    <g><rect x="24" y="20" width="168" height="100" fill="url(#ob)"/><rect x="288" y="20" width="168" height="100" fill="url(#ob)"/><rect x="24" y="180" width="168" height="100" fill="url(#ob)"/><rect x="288" y="180" width="168" height="100" fill="url(#ob)"/></g>
+    <rect x="336" y="200" width="24" height="20" rx="3" fill="none" stroke="#38BDF8" stroke-width="3"><animate attributeName="stroke-opacity" values="1;.2;1" dur="1.2s" repeatCount="indefinite"/></rect>
+    <path class="route" d="M240 296V150H348V200" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(-17 -13) scale(.35)"><use href="#bxg"/><animateMotion dur="4s" repeatCount="indefinite" path="M240 296V150H348V200" keyTimes="0;1" calcMode="linear"/></g>
+    <rect x="364" y="138" width="60" height="24" rx="12" fill="#0EA5E9"/><text x="394" y="155" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="13" font-weight="500" fill="#06121F">A-14</text>
+    <text x="270" y="290" font-family="JetBrains Mono,monospace" font-size="11" fill="#94A3B8">Entrada</text>
+  </svg></div></div>
+
+  <div class="row two"><div class="rv"><h3>Avisa antes de que falte.</h3><p>Define un stock mínimo por producto y recibe la alerta cuando las existencias bajan de ese nivel.</p></div>
+  <div class="art rv"><svg viewBox="0 0 480 300" role="img" aria-label="Gráfico de barras con stock descendente por debajo del mínimo">
+    <path d="M40 20v240h410" stroke="#334155" fill="none"/>
+    <g fill="#0EA5E9"><rect class="gb" style="--i:0" x="60" y="60" width="38" height="200" rx="4"/><rect class="gb" style="--i:1" x="115" y="80" width="38" height="180" rx="4"/><rect class="gb" style="--i:2" x="170" y="110" width="38" height="150" rx="4"/><rect class="gb" style="--i:3" x="225" y="145" width="38" height="115" rx="4"/></g>
+    <g fill="#EF4444"><rect class="gb" style="--i:4" x="280" y="175" width="38" height="85" rx="4"/><rect class="gb" style="--i:5" x="335" y="205" width="38" height="55" rx="4"/><rect class="gb" style="--i:6" x="390" y="230" width="38" height="30" rx="4"/></g>
+    <path d="M40 170H450" stroke="#EF4444" stroke-dasharray="6 5"/><text x="46" y="162" font-family="JetBrains Mono,monospace" font-size="12" fill="#EF4444">Mínimo</text>
+    <g><rect x="316" y="26" width="130" height="30" rx="15" fill="rgba(239,68,68,.14)" stroke="#EF4444"><animate attributeName="stroke-opacity" values="1;.25;1" dur="1.3s" repeatCount="indefinite"/></rect><text x="381" y="46" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="13" fill="#EF4444">Stock bajo</text></g>
+  </svg></div></div>
+
+  <div class="row two"><div class="rv"><h3>Sabe qué pasó, cuándo y quién.</h3><p>El historial completo de cada producto: entradas, traspasos y salidas, siempre en orden.</p></div>
+  <div class="art rv"><svg viewBox="0 0 480 300" role="img" aria-label="Línea de tiempo con entrada, ubicación, salida y traspaso de un producto">
+    <path d="M70 40V250" stroke="#334155" stroke-width="2"/>
+    <g class="st" style="--i:0"><circle cx="70" cy="40" r="9" fill="#0B1120" stroke="#F97316" stroke-width="2"/><text x="100" y="38" font-family="Inter,sans-serif" font-size="17" font-weight="500" fill="#F8FAFC">Entrada</text><text x="100" y="58" font-family="JetBrains Mono,monospace" font-size="13" fill="#94A3B8">+120 uds · Muelle 1</text><text x="440" y="44" text-anchor="end" font-family="JetBrains Mono,monospace" font-size="13" fill="#94A3B8">09:12</text></g>
+    <g class="st" style="--i:1"><circle cx="70" cy="110" r="9" fill="#0B1120" stroke="#0EA5E9" stroke-width="2"/><text x="100" y="108" font-family="Inter,sans-serif" font-size="17" font-weight="500" fill="#F8FAFC">Ubicado</text><text x="100" y="128" font-family="JetBrains Mono,monospace" font-size="13" fill="#94A3B8">Estantería A-14</text><text x="440" y="114" text-anchor="end" font-family="JetBrains Mono,monospace" font-size="13" fill="#94A3B8">10:40</text></g>
+    <g class="st" style="--i:2"><circle cx="70" cy="180" r="9" fill="#0B1120" stroke="#0EA5E9" stroke-width="2"/><text x="100" y="178" font-family="Inter,sans-serif" font-size="17" font-weight="500" fill="#F8FAFC">Salida</text><text x="100" y="198" font-family="JetBrains Mono,monospace" font-size="13" fill="#94A3B8">-50 uds · Pedido 0231</text><text x="440" y="184" text-anchor="end" font-family="JetBrains Mono,monospace" font-size="13" fill="#94A3B8">12:05</text></g>
+    <g class="st" style="--i:3"><circle cx="70" cy="250" r="9" fill="#10B981"/><text x="100" y="248" font-family="Inter,sans-serif" font-size="17" font-weight="500" fill="#F8FAFC">Traspaso</text><text x="100" y="268" font-family="JetBrains Mono,monospace" font-size="13" fill="#94A3B8">A-14 a B-02</text><text x="440" y="254" text-anchor="end" font-family="JetBrains Mono,monospace" font-size="13" fill="#94A3B8">16:30</text></g>
+  </svg></div></div>
+
+  <div class="row two"><div class="rv"><h3>Etiquetas listas para colocar.</h3><p>Elige los productos y prepara sus etiquetas con previsualización antes de imprimir.</p>
+    <span class="tag">Equipo y turnos</span><span class="tag">Agenda</span><span class="tag">Chat interno</span></div>
+  <div class="art rv"><svg viewBox="0 0 480 300" role="img" aria-label="Caja naranja con una etiqueta con código de barras y SKU">
+    <defs><pattern id="bc" width="14" height="48" patternUnits="userSpaceOnUse"><path d="M1 0v48M4.5 0v48M8 0v48M12 0v48" stroke="#0B1120" stroke-width="2"/></pattern></defs>
+    <rect x="50" y="30" width="380" height="240" rx="12" fill="#F97316" stroke="#C2410C" stroke-width="3"/><rect x="50" y="30" width="380" height="46" rx="12" fill="#FB923C"/><rect x="210" y="30" width="60" height="240" fill="#FDBA74" opacity=".8"/>
+    <rect x="110" y="104" width="260" height="150" rx="8" fill="#fff"/>
+    <text x="128" y="132" font-family="Space Grotesk,sans-serif" font-weight="700" font-size="20" fill="#0B1120">StockScan</text><text x="128" y="152" font-family="Inter,sans-serif" font-size="13" fill="#475569">Tornillo M8 x 40 · A-14</text>
+    <rect x="128" y="162" width="224" height="48" fill="url(#bc)"/>
+    <text x="240" y="238" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="14" letter-spacing="3" fill="#0B1120">SKU-4012-B</text>
+    <rect x="122" y="162" width="236" height="3" fill="#0EA5E9"><animate attributeName="y" values="160;208;160" dur="2.4s" repeatCount="indefinite"/></rect>
+  </svg></div></div>
+</div></section>
+
+<section id="arquitectura"><div class="wrap two">
+  <div class="rv">
+    <h2>Una base sólida para evitar errores</h2>
+    <p class="big">Java, MVC y un patrón DAO que mantiene los datos en su sitio.</p>
+    <p><strong style="color:var(--txt)">Java 21 y Swing.</strong> Una aplicación de escritorio estable que funciona en cualquier puesto.</p>
+    <p><strong style="color:var(--txt)">Capa DAO.</strong> El acceso a datos queda aislado, así que la lógica nunca toca la base de datos directamente.</p>
+    <p><strong style="color:var(--txt)">Interfaz para el operario.</strong> Pantallas claras, foco visible y manejo con teclado.</p>
+  </div>
+  <div class="art rv"><svg viewBox="0 0 480 330" role="img" aria-label="Capas de la arquitectura: vista, controlador, modelo, DAO y SQLite">
+    <g font-family="JetBrains Mono,monospace" font-size="15" font-weight="500">
+    <g class="st" style="--i:0"><rect x="40" y="16" width="400" height="48" rx="10" fill="#0C4A6E" stroke="#0EA5E9"/><text x="64" y="46" fill="#F8FAFC">Vista · Java Swing</text></g>
+    <g class="st" style="--i:1"><rect x="40" y="78" width="400" height="48" rx="10" fill="#111827" stroke="#0284C7"/><text x="64" y="108" fill="#F8FAFC">Controlador</text></g>
+    <g class="st" style="--i:2"><rect x="40" y="140" width="400" height="48" rx="10" fill="#111827" stroke="#0284C7"/><text x="64" y="170" fill="#F8FAFC">Modelo</text></g>
+    <g class="st" style="--i:3"><rect x="40" y="202" width="400" height="48" rx="10" fill="#111827" stroke="#10B981"/><text x="64" y="232" fill="#F8FAFC">DAO</text></g>
+    <g class="st" style="--i:4"><rect x="40" y="264" width="400" height="48" rx="10" fill="#111827" stroke="#334155" stroke-dasharray="6 5"/><text x="64" y="294" fill="#94A3B8">SQLite (previsto)</text></g></g>
+    <circle r="5" fill="#F97316"><animateMotion dur="3s" repeatCount="indefinite" path="M420 40V288"/></circle>
+  </svg></div>
+</div></section>
+
+<section id="ecosistema"><div class="wrap">
+  <h2 class="rv">Ecosistema abierto</h2>
+  <p class="lead rv">Todo el trabajo es público. Entra, mira el código y sigue cómo avanza.</p>
+  <div class="grid4">
+    <a class="tile rv" href="https://github.com/stockscan-team/stockscan-sga"><svg class="ic"><use href="#code"/></svg><h3>stockscan-sga</h3><p>Repositorio principal: lógica, persistencia y documentación.</p><span class="go">Abrir en GitHub <svg class="ic" width="16" height="16"><use href="#out"/></svg></span></a>
+    <a class="tile rv" href="https://github.com/stockscan-team/stockscan-dii"><svg class="ic"><use href="#pointer"/></svg><h3>stockscan-dii</h3><p>Interfaz gráfica en Java Swing y accesibilidad.</p><span class="go">Abrir en GitHub <svg class="ic" width="16" height="16"><use href="#out"/></svg></span></a>
+    <a class="tile rv" href="https://github.com/stockscan-team/stockscan-sga/tree/main/docs"><svg class="ic"><use href="#book"/></svg><h3>Documentación</h3><p>Memorias de cada sprint y decisiones de arquitectura.</p><span class="go">Leer la documentación <svg class="ic" width="16" height="16"><use href="#out"/></svg></span></a>
+    <a class="tile rv" href="https://github.com/orgs/stockscan-team/projects/1"><svg class="ic"><use href="#layers"/></svg><h3>Tablero ágil</h3><p>Tareas y sprints del equipo.</p><span class="go">Ver el tablero <svg class="ic" width="16" height="16"><use href="#out"/></svg></span></a>
+  </div>
+</div></section>
+
+<section id="equipo"><div class="wrap">
+  <h2 class="rv">Equipo fundador</h2>
+  <p class="lead rv">Cuatro personas, un mismo objetivo.</p>
+  <div class="grid4">
+    <a class="tile rv" href="https://github.com/romanscriptt"><div class="av">AL</div><h3>Álvaro López</h3><p class="mono" style="font-size:.85rem">@romanscriptt</p></a>
+    <a class="tile rv" href="https://github.com/angelluissanchez25"><div class="av">AS</div><h3>Ángel Luis Sánchez</h3><p class="mono" style="font-size:.85rem">@angelluissanchez25</p></a>
+    <a class="tile rv" href="https://github.com/carmenmonge25"><div class="av">CM</div><h3>Carmen Monge</h3><p class="mono" style="font-size:.85rem">@carmenmonge25</p></a>
+    <a class="tile rv" href="https://github.com/elenasaez25"><div class="av">ES</div><h3>Elena Sáez</h3><p class="mono" style="font-size:.85rem">@elenasaez25</p></a>
+  </div>
+</div></section>
+
+<section id="newsletter"><div class="wrap"><div class="news rv">
+  <div><h2 style="font-size:clamp(2rem,4vw,3.2rem)">Bitácora de Evolución StockScan</h2><p>Recibe un aviso con cada avance: nuevas versiones, mejoras de usabilidad y lanzamientos. Para empresas, equipos técnicos y quien siga el proyecto de cerca.</p></div>
+  <form id="nf" novalidate>
+    <div><label for="em">Correo electrónico</label><input id="em" type="email" required autocomplete="email" placeholder="nombre@empresa.com"></div>
+    <div><label for="pf">Perfil (opcional)</label><select id="pf"><option value="">Prefiero no indicarlo</option><option>Empresa / Almacén</option><option>Desarrollador / Técnico</option><option>Seguimiento Académico</option></select></div>
+    <button class="btn pri" id="sb" type="submit" style="justify-content:center"><svg class="ic ficon" style="stroke:#06121F"><use href="#chk"/></svg><span id="sl">Suscribirme</span></button>
+    <p class="msg" id="msg" role="status"></p>
+    <p class="fine">Usaremos tu correo solo para enviarte novedades de StockScan. Puedes darte de baja cuando quieras.</p>
+  </form>
+</div></div></section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span class="pill ok mono">v0.3.0 · En desarrollo activo</span>
+    <div class="fl"><a href="https://github.com/stockscan-team">stockscan-team</a><a href="https://github.com/stockscan-team/stockscan-sga">stockscan-sga</a><a href="https://github.com/stockscan-team/stockscan-dii">stockscan-dii</a><a href="#newsletter">Aviso de privacidad</a></div>
+  </div>
+  <div class="giant" id="giant" aria-hidden="true"><svg viewBox="0 0 1000 150">
+    <defs>
+      <linearGradient id="gg" x1="0" y1="0" x2="0" y2="150" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#38BDF8"/><stop offset="1" stop-color="#0284C7"/></linearGradient>
+      <linearGradient id="sh"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".85"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+      <text id="gt" x="0" y="300" textLength="1000" lengthAdjust="spacingAndGlyphs" style="font-family:Archivo,Impact,'Arial Black',sans-serif;font-weight:900;font-stretch:62%;font-size:420px">STOCKSCAN</text>
+      <mask id="mk" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="150"><use href="#gt" fill="#fff" stroke="#fff" stroke-width="9"/></mask>
+    </defs>
+    <use href="#gt" fill="url(#gg)" stroke="url(#gg)" stroke-width="9" stroke-linejoin="round"/>
+    <rect y="0" width="150" height="150" fill="url(#sh)" mask="url(#mk)"><animate attributeName="x" from="-220" to="1100" dur="4.5s" repeatCount="indefinite"/></rect>
+  </svg></div>
+</footer>
+
+<script>
+const RM=matchMedia("(prefers-reduced-motion:reduce)").matches,$=id=>document.getElementById(id);
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}}),{threshold:.12});
+document.querySelectorAll(".rv,.giant").forEach(el=>io.observe(el));
+if(RM)document.querySelectorAll("svg").forEach(s=>s.pauseAnimations&&s.pauseAnimations());
+if(!RM){let t=false;addEventListener("scroll",()=>{if(!t){t=true;requestAnimationFrame(()=>{$("glow").style.transform=`translateY(${scrollY*.15}px)`;t=false})}},{passive:true})}
+
+/* Escena del hero: móvil escanea paquete y este viaja a su ubicación */
+const NS="http://www.w3.org/2000/svg",SK=["SKU-4012-B","SKU-7788-N","PAL-0231-R","SKU-5530-C","SKU-1187-A","PAL-0402-D"];
+const T=[[0,3],[1,0],[2,1],[0,1],[1,2],[2,2]],PRE=[[0,0],[0,2],[1,1],[1,3],[2,0],[2,3]];
+const sg=$("slots"),pos=(r,c)=>[508+100*c,60+90*r],lab=(r,c)=>"ABC"[r]+"-"+(11+c);
+function mk(n,a,p){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);(p||sg).appendChild(e);return e}
+function boxAt(r,c,cls){const [x,y]=pos(r,c);return mk("use",{href:"#bxg",transform:`translate(${x+.7} ${y+2.3}) scale(.86)`,class:cls||""})}
+for(let r=0;r<3;r++)for(let c=0;c<4;c++){const [x,y]=pos(r,c);mk("rect",{x,y,width:84,height:70,rx:5,fill:"none",stroke:"#334155","stroke-dasharray":"4 4"});const t=mk("text",{x:x+6,y:y+64,"font-family":"JetBrains Mono,monospace","font-size":11,fill:"#64748B"});t.textContent=lab(r,c)}
+PRE.forEach(([r,c])=>boxAt(r,c));
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2,sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const anim=(ms,fn)=>new Promise(res=>{const t0=performance.now();(function f(n){const p=Math.min(1,(n-t0)/ms);fn(p);p<1?requestAnimationFrame(f):res()})(t0)});
+const setPkg=(x,y,s)=>$("pkg").setAttribute("transform",`translate(${x} ${y}) scale(${s})`),show=(id,v)=>$(id).setAttribute("opacity",v);
+const phoneY=y=>$("phone").setAttribute("transform",`translate(0 ${y})`);
+let targets=[...T],n=0;
+if(RM){phoneY(0);show("phone",1);$("ps1").textContent="Leído";$("ps2").textContent=SK[0];$("pt").textContent="Ir a A-14";show("pp",1);boxAt(0,3);setPkg(60,262,1);show("pkg",1)}
+else(async function loop(){for(;;){
+ if(!targets.length){sg.querySelectorAll(".new").forEach(e=>e.remove());targets=[...T]}
+ const [r,c]=targets.shift(),[x,y]=pos(r,c),L=lab(r,c),sx=108,sy=300,tx=x+42,ty=y+35,cx=(sx+tx)/2,cy=Math.min(sy,ty)-100;
+ $("ps1").textContent="Esperando…";$("ps2").textContent="";show("pp",0);show("pkg",1);
+ await anim(900,p=>setPkg(-110+170*ease(p),262,1));
+ show("phone",1);await anim(500,p=>phoneY(-170*(1-ease(p))));
+ $("ps1").textContent="Escaneando…";show("beam",1);show("sl",1);
+ await anim(1100,p=>$("sl").setAttribute("y",262+72*(p<.5?p*2:2-2*p)));
+ show("beam",0);show("sl",0);$("ps1").textContent="Leído";$("ps2").textContent=SK[n++%SK.length];await sleep(250);
+ $("pt").textContent="Ir a "+L;show("pp",1);
+ $("tgt").setAttribute("x",x);$("tgt").setAttribute("y",y);show("tgt",1);
+ const rt=$("route");rt.setAttribute("d",`M${sx} ${sy}Q${cx} ${cy} ${tx} ${ty}`);show("route",.9);
+ await sleep(500);
+ await anim(1300,p=>{const e=ease(p),a=(1-e)**2,b=2*(1-e)*e,d=e*e,px=a*sx+b*cx+d*tx,py=a*sy+b*cy+d*ty,s=1-.14*e;setPkg(px-48*s,py-38*s,s)});
+ show("pkg",0);boxAt(r,c,"new");show("tgt",0);show("route",0);
+ const rp=$("rip");rp.setAttribute("cx",tx);rp.setAttribute("cy",ty);
+ const bd=$("badge");bd.setAttribute("transform",`translate(${tx} ${y-16})`);$("bt").textContent=L+" · Ubicado";show("badge",1);
+ await anim(600,p=>{rp.setAttribute("r",10+46*p);rp.setAttribute("opacity",1-p)});
+ await sleep(900);show("badge",0);show("pp",0);
+ await anim(400,p=>phoneY(-170*ease(p)));show("phone",0);await sleep(250);
+}})();
+
+/* Pon aquí la URL de tu servicio de formularios (p. ej. Formspree) para guardar correos de verdad */
+const ENDPOINT="";
+$("nf").addEventListener("submit",async e=>{e.preventDefault();const m=$("msg"),em=$("em").value.trim();
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){m.className="msg warn";m.textContent="Escribe un correo válido, por ejemplo nombre@empresa.com.";$("em").focus();return}
+ $("sb").disabled=true;$("sl").textContent="Enviando…";
+ try{if(ENDPOINT)await fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({email:em,perfil:$("pf").value})});else await new Promise(r=>setTimeout(r,700));
+  $("sb").classList.add("done");$("sl").textContent="Suscripción registrada";m.className="msg ok";m.textContent="Listo. Te avisaremos con cada novedad de StockScan.";$("nf").reset()}
+ catch(err){$("sb").disabled=false;$("sl").textContent="Suscribirme";m.className="msg warn";m.textContent="No hemos podido registrar tu correo. Inténtalo de nuevo en unos minutos."}});
+</script>
+</body>
+</html>
